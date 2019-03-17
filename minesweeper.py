@@ -1,3 +1,5 @@
+import random
+
 class InvalidInputError(Exception):
     ''' signal invalid user input '''
     pass
@@ -7,7 +9,7 @@ class cell(object):
     It has following game states:
     - mined
     - clear
-    - or a number indicating mined cells
+    - or a number indicating adjoining mined cells
     It has following display states:
     - closed
     - flagged
@@ -35,12 +37,42 @@ class board(object):
     def __init__(self, rows, columns, mines):
         ''' initialize the board with specified rows, columns and mines'''
         self._mines = mines
-        self.cells = [[self._init_cell(i,j) for j in range(columns)] for i in range(rows)]
+        self._rows = rows
+        self._columns = columns
 
-    def _init_cell(self, row, col):
-        ''' returns a cell in it's initial state at the beginingof the game '''
-        pass
-    
+        # pick randoms mine cells
+        self._mine_cells = []
+        while len(self._mine_cells) < mines:
+            i, j = random.randint(0,rows-1), random.randint(0, columns-1)
+            if (i, j) not in self._mine_cells:
+                self._mine_cells.append((i, j))
+
+        # initialize the board
+        self.cells = [[cell(game_state="clear") for j in range(columns)] for i in range(rows)]
+
+        # place the mines
+        for (row, col) in self._mine_cells:
+            self.cells[row][col]._game_state = "mined"
+
+        # setup rest of the cells
+        for row in range(self._rows):
+            for col in range(self._columns):
+                if self.cells[row][col]._game_state == "clear":
+                    # check if the cell has adjoining mines and set a number, if any
+                    mine_count = self._get_adjoining_mines(row, col)
+                    if mine_count > 0:
+                        self.cells[row][col]._game_state = str(mine_count)
+
+    def _get_adjoining_mines(self, row, col):
+        ''' return the number of mines adjoining the cell '''
+        adjoining_cells = [
+            (row-1, col-1), (row-1, col), (row-1, col+1),
+            (row, col-1), (row, col+1),
+            (row+1, col-1), (row+1, col), (row+1, col+1),
+        ]
+        adjoining_mines = list(filter(lambda x: x in self._mine_cells, adjoining_cells))
+        return len(adjoining_mines)
+
     def open_one(self, row, col):
         ''' opens the specified cell '''
         pass
