@@ -145,7 +145,7 @@ class board(object):
         }
         if move in invalid_moves[display_state]:
             raise InvalidInputError(
-                move.name + " is not allowed for a cell that is " + display_state)
+                move.name + " is not allowed for a cell that is " + display_state.name)
 
     def try_move(self, row: int, col: int, move: Move):
         ''' tries the specified move on a cpecified cell. One of possible outcome:
