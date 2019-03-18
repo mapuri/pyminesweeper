@@ -18,15 +18,17 @@ class TestBoard(unittest.TestCase):
             },
         }
         for name, test in tests.items():
-            b = minesweeper.board(test["rows"], test["columns"], test["mines"])
-            self.assertEqual(len(b._mine_cells), test["mines"], msg=name)
-            self.assertEqual(len(b.cells), test["rows"], msg=name)
-            self.assertEqual(len(b.cells[0]), test["columns"], msg=name)
-            for i in range(test["rows"]):
-                for j in range(test["columns"]):
-                    if (i, j) in b._mine_cells:
-                        self.assertEqual(
-                            b.cells[i][j]._game_state, "mined", msg=name)
+            with self.subTest(name=name):
+                b = minesweeper.board(
+                    test["rows"], test["columns"], test["mines"])
+                self.assertEqual(len(b._mine_cells), test["mines"])
+                self.assertEqual(len(b.cells), test["rows"])
+                self.assertEqual(len(b.cells[0]), test["columns"])
+                for i in range(test["rows"]):
+                    for j in range(test["columns"]):
+                        if (i, j) in b._mine_cells:
+                            self.assertEqual(
+                                b.cells[i][j]._game_state, minesweeper.GameState.mined)
 
     def test_get_adjoining_mines(self):
         tests = {
@@ -50,10 +52,59 @@ class TestBoard(unittest.TestCase):
             },
         }
         for name, test in tests.items():
-            b = minesweeper.board(0, 0, 0)
-            b._mine_cells = test["mines_cells"]
-            self.assertEqual(b._get_adjoining_mines(
-                test["row"], test["col"]), test["count"], msg=name)
+            with self.subTest(name=name):
+                b = minesweeper.board(0, 0, 0)
+                b._mine_cells = test["mines_cells"]
+                self.assertEqual(b._get_adjoining_mines(
+                    test["row"], test["col"]), test["count"])
+
+    def test_check_cell(self):
+        pass
+
+    def test_check_move(self):
+        pass
+
+    def test_try_move(self):
+        pass
+
+    def test_refesh_display(self):
+        pass
+
+
+class TestCell(unittest.TestCase):
+    def test_str(self):
+        tests = {
+            "closed-cell": {
+                "game_state": minesweeper.GameState.mined,
+                "display_state": minesweeper.DisplayState.closed,
+                "str": "\u25C9",
+            },
+            "flagged-cell": {
+                "game_state": minesweeper.GameState.mined,
+                "display_state": minesweeper.DisplayState.flagged,
+                "str": "\u26F3",
+            },
+            "opened-mined-cell": {
+                "game_state": minesweeper.GameState.mined,
+                "display_state": minesweeper.DisplayState.opened,
+                "str": "\u2620",
+            },
+            "opened-clear-cell": {
+                "game_state": minesweeper.GameState.clear,
+                "display_state": minesweeper.DisplayState.opened,
+                "str": "\u25EF",
+            },
+            "opened-numbered-cell": {
+                "game_state": 11,
+                "display_state": minesweeper.DisplayState.opened,
+                "str": "11",
+            },
+        }
+        for name, test in tests.items():
+            with self.subTest(name=name):
+                cell = minesweeper.cell(game_state=test["game_state"])
+                cell._display_state = test["display_state"]
+                self.assertEqual(str(cell), test["str"])
 
 
 if __name__ == "__main__":
