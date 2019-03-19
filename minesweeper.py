@@ -204,9 +204,12 @@ class board(object):
 
     def refresh_display(self):
         ''' prints the current state of the board '''
+        print("*".join([" " for i in range(20)]))
+        print("{} flags remaining".format(self._flags))
         print("{} {}".format(" ", [str(i) for i in range(self._columns)]))
         for i in range(self._rows):
             print("{} {}".format(i, [str(cell) for cell in self.cells[i]]))
+        print("*".join([" " for i in range(20)]))
 
 
 class game(object):
