@@ -325,6 +325,39 @@ class TestBoard(unittest.TestCase):
                         self.assertEqual(
                             b.cells[i][j]._display_state, test["new_display_states"][i][j], msg="row: {}, col: {}".format(i, j))
 
+    def test_more_moves_remaining(self):
+        def openAllCells(board: minesweeper.board):
+            for i in range(board.rows()):
+                for j in range(board.columns()):
+                    board.cells[i][j]._display_state = minesweeper.DisplayState.opened
+
+        def openAllCellsAndConsumeAllFlags(board: minesweeper.board):
+            for i in range(board.rows()):
+                for j in range(board.columns()):
+                    board.cells[i][j]._display_state = minesweeper.DisplayState.opened
+            board._flags = 0
+
+        tests = {
+            "closed-cells": {
+                "setup": None,
+                "moreMoves": True,
+            },
+            "remaining-flags": {
+                "setup": openAllCells,
+                "moreMoves": True,
+            },
+            "no-more-moves": {
+                "setup": openAllCellsAndConsumeAllFlags,
+                "moreMoves": False,
+            },
+        }
+        for name, test in tests.items():
+            with self.subTest(name=name):
+                b = minesweeper.board(rows=3, columns=3, mines=2)
+                if test["setup"] is not None:
+                    test["setup"](b)
+                self.assertEqual(b.more_moves_remaining(), test["moreMoves"])
+
 
 class TestCell(unittest.TestCase):
     def test_str(self):

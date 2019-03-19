@@ -211,6 +211,15 @@ class board(object):
             print("{} {}".format(i, [str(cell) for cell in self.cells[i]]))
         print("*".join([" " for i in range(20)]))
 
+    def more_moves_remaining(self):
+        ''' checks if there are more moves remaining '''
+        # if a cell is still in closed state, then there are more moves possible
+        for i in range(self._rows):
+            if any([cell._display_state == DisplayState.closed for cell in self.cells[i]]):
+                return True
+        # otherwise if any flags are remainging then there are more moves possible
+        return self._flags > 0
+
 
 class game(object):
     ''' game interfaces with the board through moves to progress the game. '''
@@ -265,7 +274,7 @@ class game(object):
                 return ("no", True)
 
         self.board.refresh_display()
-        while True:
+        while self.board.more_moves_remaining():
             try:
                 row = self._input(msg="Enter the row: ",
                                   validator=validate_int)
@@ -288,6 +297,7 @@ class game(object):
                     return
             finally:
                 self.board.refresh_display()
+        print("Hooray!! You won!!")
 
     def _input(self, msg=None, validator=None):
         ''' accepts a user input and validates it using specified validator '''
