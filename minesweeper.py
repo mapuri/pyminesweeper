@@ -163,6 +163,8 @@ class board(object):
             # _check_move ensure that only display state possible here is DisplayState.closed
             if cell._game_state != GameState.mined:
                 cell._display_state = DisplayState.opened
+                if cell._game_state == GameState.clear:
+                    self._open_adjoining_clear(row, col)
             if cell._game_state == GameState.mined:
                 # set the state of cells to open and raise the exception to end the game
                 for i in range(self._rows):
@@ -183,6 +185,23 @@ class board(object):
             self._flags += 1
             cell._display_state = DisplayState.closed
 
+    def _open_adjoining_clear(self, row: int, col: int):
+        ''' tries to open all adjoining cells that are clear '''
+        adjoining_cells = [
+            (row-1, col-1), (row-1, col), (row-1, col+1),
+            (row, col-1), (row, col+1),
+            (row+1, col-1), (row+1, col), (row+1, col+1),
+        ]
+
+        valid_cells = list(filter(lambda t: t[0] >= 0 and t[0] <
+                                  self._rows and t[1] >= 0 and t[1] < self._columns, adjoining_cells))
+        for adj_row, adj_col in valid_cells:
+            adj_cell = self.cells[adj_row][adj_col]
+            if adj_cell._display_state == DisplayState.closed and adj_cell._game_state != GameState.mined:
+                adj_cell._display_state = DisplayState.opened
+                if adj_cell._game_state == GameState.clear:
+                    self._open_adjoining_clear(adj_row, adj_col)
+
     def refresh_display(self):
         ''' prints the current state of the board '''
         print("{} {}".format(" ", [str(i) for i in range(self._columns)]))
@@ -195,7 +214,7 @@ class game(object):
 
     def __init__(self, difficulty="easy"):
         ''' initializes the game with specified difficulty. Possible difficulty values are:
-        - easy : 8 x 10 board, 10 mines
+        - easy: 8 x 10 board, 10 mines
         - medium: 14 x 18 board, 40 mines
         - hard: 20 x 24 board, 100 mines
         '''
@@ -212,7 +231,7 @@ class game(object):
 
     def play(self):
         ''' represents the game. It:
-        - accepts the moves (a tuple representing action on a specific cell)
+        - accepts the moves(a tuple representing action on a specific cell)
         - updates the state
         - and repeats until game is won or lost
         '''

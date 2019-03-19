@@ -261,6 +261,70 @@ class TestBoard(unittest.TestCase):
                     test["board"].cells[test["row"]][test["col"]]._display_state, test["new_display_state"])
                 self.assertEqual(test["board"]._flags, test["new_flags"])
 
+    def test_open_adjoining_clear(self):
+        tests = {
+            "case 1": {
+                "cells": [
+                    [minesweeper.cell(game_state=minesweeper.GameState.clear),
+                     minesweeper.cell(game_state=minesweeper.GameState.clear),
+                     minesweeper.cell(game_state=1),
+                     minesweeper.cell(game_state=minesweeper.GameState.clear)],
+
+                    [minesweeper.cell(game_state=minesweeper.GameState.clear),
+                     minesweeper.cell(game_state=minesweeper.GameState.clear),
+                     minesweeper.cell(game_state=1),
+                     minesweeper.cell(game_state=minesweeper.GameState.clear)],
+
+                    [minesweeper.cell(game_state=1),
+                     minesweeper.cell(game_state=1),
+                     minesweeper.cell(game_state=1),
+                     minesweeper.cell(game_state=minesweeper.GameState.clear)],
+
+                    [minesweeper.cell(game_state=minesweeper.GameState.clear),
+                     minesweeper.cell(game_state=minesweeper.GameState.clear),
+                     minesweeper.cell(game_state=minesweeper.GameState.clear),
+                     minesweeper.cell(game_state=minesweeper.GameState.clear)],
+                ],
+                "rows": 4,
+                "cols": 4,
+                "row": 0,
+                "col": 0,
+                "new_display_states": [
+                    [minesweeper.DisplayState.opened,
+                     minesweeper.DisplayState.opened,
+                     minesweeper.DisplayState.opened,
+                     minesweeper.DisplayState.closed],
+
+                    [minesweeper.DisplayState.opened,
+                     minesweeper.DisplayState.opened,
+                     minesweeper.DisplayState.opened,
+                     minesweeper.DisplayState.closed],
+
+                    [minesweeper.DisplayState.opened,
+                     minesweeper.DisplayState.opened,
+                     minesweeper.DisplayState.opened,
+                     minesweeper.DisplayState.closed],
+
+                    [minesweeper.DisplayState.closed,
+                     minesweeper.DisplayState.closed,
+                     minesweeper.DisplayState.closed,
+                     minesweeper.DisplayState.closed],
+                ],
+            },
+        }
+        for name, test in tests.items():
+            with self.subTest(name=name):
+                b = minesweeper.board(
+                    rows=test["rows"], columns=test["cols"], mines=0)
+                b.cells = test["cells"]
+                b.cells[test["row"]][test["col"]
+                                     ]._display_state = minesweeper.DisplayState.opened
+                b._open_adjoining_clear(row=test["row"], col=test["col"])
+                for i in range(test["rows"]):
+                    for j in range(test["cols"]):
+                        self.assertEqual(
+                            b.cells[i][j]._display_state, test["new_display_states"][i][j], msg="row: {}, col: {}".format(i, j))
+
 
 class TestCell(unittest.TestCase):
     def test_str(self):
